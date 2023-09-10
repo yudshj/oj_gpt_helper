@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页标题</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            width: 80%;
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .readonly {
+            background-color: #fff;
+            color: #000;
+            border: none;
+            /* resize: none; */
+        }
+
+        .submitButtonDiv {
+            grid-column: 1 / 3;
+            /* center */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #submitButton {
+            width: 66%;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #66ccff;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 60%;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="container">
+            <div class="label">提交URL</div>
+            <input type="text" id="submissionUrl" class="input" />
+
+            <div class="label">IDE错误提示<br>（如有）</div>
+            <textarea id="ideHint" class="input"></textarea>
+
+            <div class="submitButtonDiv">
+                <button id="submitButton">提交</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="label">GPT回答:</div>
+            <textarea id="gptAnswer" class="input readonly" readonly></textarea>
+        </div>
+    </div>
+
+
+    <script>
+        function updateResponseText(text) {
+            const gptAnswer = document.getElementById('gptAnswer');
+            gptAnswer.value = text;
+        }
+        const submitButton = document.getElementById('submitButton');
+        submitButton.addEventListener('click', () => {
+            const submissionUrl = document.getElementById('submissionUrl').value;
+            const ideHint = document.getElementById('ideHint').value;
+
+            // 创建 JSON 数据
+            const jsonData = {
+                submission_url: submissionUrl,
+                ide_hint: ideHint
+            };
+
+            // 发送 JSON 数据到指定 URL
+            fetch('http://127.0.0.1:8000/api/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 在这里处理提交后的响应
+                console.log(data);
+                response_json = data['response'];
+                response = JSON.parse(response_json);
+                updateResponseText(response['message']['content']);
+                // alert('提交成功！');
+            })
+            .catch(error => {
+                // 处理提交错误
+                console.error('提交失败：', error);
+                updateResponseText('提交失败！');
+                // alert('提交失败！');
+            });
+        });
+    </script>
+</body>
+</html>

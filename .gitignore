@@ -1,0 +1,4 @@
+utils/config.py
+.DS_Store
+__pycache__
+*.sqlite3
